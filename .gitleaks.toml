@@ -3,6 +3,12 @@
 useDefault = true
 
 [[rules]]
+id = "quotient-key"
+description = "Quotient API key assigned a value"
+regex = '''QUOTIENT_API_KEY[ \t]*[=:][ \t]*["']?[A-Za-z0-9+/=_-]{8,}'''
+keywords = ["quotient_api_key"]
+
+[[rules]]
 id = "polymarket-us-key"
 description = "Polymarket US API key or secret assigned a value"
 regex = '''POLYMARKET_(?:KEY_ID|SECRET_KEY)[ \t]*[=:][ \t]*["']?[A-Za-z0-9+/=_-]{8,}'''

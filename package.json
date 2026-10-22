@@ -11,9 +11,11 @@
     "test": "node --test \"tests/*.test.ts\"",
     "markets": "node scripts/markets.ts",
     "reconcile": "node scripts/reconcile.ts",
-    "scan": "sh scripts/scan-secrets.sh"
+    "scan": "sh scripts/scan-secrets.sh",
+    "quotient": "QUOTIENT_DISABLE_UPDATE_CHECK=1 node --env-file-if-exists=.env node_modules/.bin/quotient"
   },
   "dependencies": {
-    "polymarket-us": "0.1.1"
+    "polymarket-us": "0.1.1",
+    "quotient-forecasting": "0.8.36"
   }
 }
