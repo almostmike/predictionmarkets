@@ -1,0 +1,11 @@
+# Secrets: never commit
+.env
+.env.*
+!.env.example
+
+# Raw API responses and local run logs stay on the Mac
+.cache/
+logs/
+
+node_modules/
+.DS_Store

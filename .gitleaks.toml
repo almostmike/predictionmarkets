@@ -1,0 +1,15 @@
+# Default gitleaks rules plus Polymarket US key assignments.
+[extend]
+useDefault = true
+
+[[rules]]
+id = "polymarket-us-key"
+description = "Polymarket US API key or secret assigned a value"
+regex = '''POLYMARKET_(?:KEY_ID|SECRET_KEY)[ \t]*[=:][ \t]*["']?[A-Za-z0-9+/=_-]{8,}'''
+keywords = ["polymarket_key_id", "polymarket_secret_key"]
+
+# Gitignored paths never reach GitHub, so the working-tree scan skips them.
+# .env holds the real keys; scanning it would block every push.
+[[allowlists]]
+description = "gitignored paths"
+paths = ['''(^|/)node_modules/''', '''(^|/)\.env$''', '''(^|/)\.cache/''', '''(^|/)logs/''']

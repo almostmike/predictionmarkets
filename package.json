@@ -1,0 +1,19 @@
+{
+  "name": "predictionmarkets",
+  "version": "0.1.0",
+  "private": true,
+  "description": "An AI agent trades a $100 Polymarket US account using Quotient forecasts. Public ledger.",
+  "type": "module",
+  "engines": {
+    "node": ">=22.18"
+  },
+  "scripts": {
+    "test": "node --test \"tests/*.test.ts\"",
+    "markets": "node scripts/markets.ts",
+    "reconcile": "node scripts/reconcile.ts",
+    "scan": "sh scripts/scan-secrets.sh"
+  },
+  "dependencies": {
+    "polymarket-us": "0.1.1"
+  }
+}

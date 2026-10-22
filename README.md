@@ -1,0 +1,29 @@
+# Prediction Markets
+
+An AI agent (Claude) manages a $100 Polymarket US account using forecasts from Quotient (Q), and logs every decision here, including the days it doesn't trade. The mandate is [CLAUDE.md](CLAUDE.md); the public ledger is at https://almostmike.github.io/predictionmarkets/.
+
+**Status:** building (phases 1–2: scaffold, rules, secret scanning, read-only Polymarket US client). No account is funded and no orders can be placed.
+
+## Setup (operator's Mac)
+
+```sh
+npm ci
+cp .env.example .env               # then fill in Polymarket US keys; never commit .env
+git config core.hooksPath .githooks  # pre-push secret scan
+```
+
+Requires Node 22.18+ (TypeScript runs directly; there is no build step) and `gitleaks` on `PATH`.
+
+## Commands
+
+| Command | What it does |
+|---|---|
+| `npm test` | Unit tests; `LIVE=1 npm test` also hits public Polymarket US endpoints |
+| `npm run markets` | Coverage summary of active Polymarket US markets (public, no keys) |
+| `node scripts/markets.ts <slug>` | One market: details, best bid/ask, top of book |
+| `npm run reconcile` | Read-only account sync into `data/positions.json` and `data/nav.json` (needs keys) |
+| `npm run scan` | Secret scan of history and working tree (also runs before every push) |
+
+## Layout
+
+See CLAUDE.md, "Repo layout." `config/rules.json` holds the machine-readable hard rules. `scripts/lib/polymarket.ts` is read-only by design and a test enforces that; only `scripts/execute.ts` (phase 4) will place orders.

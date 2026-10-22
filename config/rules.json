@@ -1,0 +1,35 @@
+{
+  "version": "0.2",
+  "source": "CLAUDE.md v0.2, mandate rules 4-12. Change only with an operator-approved, dated amendment.",
+  "starting_capital_usd": 100,
+  "position_cap_pct_nav": 5,
+  "max_open_positions": 15,
+  "min_edge_pp": 10,
+  "fee_model": {
+    "formula": "theta * contracts * p * (1 - p)",
+    "assume_taker_theta": 0.0695
+  },
+  "order_types_allowed": ["ORDER_TYPE_LIMIT"],
+  "max_cross_usd": 0.02,
+  "daily_entry_limit_usd": 25,
+  "timezone": "America/Los_Angeles",
+  "drawdown_halt_nav_usd": 20,
+  "max_days_to_resolution": 60,
+  "entry_intents": ["ORDER_INTENT_BUY_LONG", "ORDER_INTENT_BUY_SHORT"],
+  "exit_intents": ["ORDER_INTENT_SELL_LONG", "ORDER_INTENT_SELL_SHORT"],
+  "exclusions": {
+    "keywords": [
+      "Intuitive Surgical", "ISRG",
+      "Johnson & Johnson", "JNJ",
+      "Zimmer", "ZBH",
+      "Smith & Nephew", "SNN",
+      "Stryker", "SYK",
+      "Medtronic", "MDT",
+      "Quotient",
+      "San Diego State", "SDSU", "Aztecs",
+      "San Jose State", "San José State", "SJSU"
+    ],
+    "note": "Keyword match on question, title, description, and team names, case-insensitive and whole-word. A hit blocks entry; the agent may also exclude markets the list misses (rule 10, last bullet)."
+  },
+  "kill_switch_file": "STOP"
+}
