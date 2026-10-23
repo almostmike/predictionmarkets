@@ -2,7 +2,7 @@
 
 An AI agent (Claude) manages a $100 Polymarket US account using forecasts from Quotient (Q), and logs every decision here, including the days it doesn't trade. The mandate is [CLAUDE.md](CLAUDE.md); the public ledger is at https://almostmike.github.io/predictionmarkets/.
 
-**Status:** building (phases 1–2: scaffold, rules, secret scanning, read-only Polymarket US client). No account is funded and no orders can be placed.
+**Status:** building. Phases 1–3 are done: scaffold, rules, secret scanning, read-only Polymarket US client, and Quotient matching. No account is funded and no orders can be placed.
 
 ## Setup (operator's Mac)
 
@@ -21,6 +21,9 @@ Requires Node 22.18+ (TypeScript runs directly; there is no build step) and `git
 | `npm test` | Unit tests; `LIVE=1 npm test` also hits public Polymarket US endpoints |
 | `npm run markets` | Coverage summary of active Polymarket US markets (public, no keys) |
 | `node scripts/markets.ts <slug>` | One market: details, best bid/ask, top of book |
+| `node scripts/match.ts` | Pull Q forecasts (about $0.04), propose Polymarket US matches, price them; writes `.cache/match/YYYY-MM-DD.json` |
+| `node scripts/match.ts record …` | Append an agent-confirmed match, with its rules comparison, to `data/forecasts.jsonl` |
+| `npm run quotient -- <cmd>` | The pinned Quotient CLI (add `--json`) |
 | `npm run reconcile` | Read-only account sync into `data/positions.json` and `data/nav.json` (needs keys) |
 | `npm run scan` | Secret scan of history and working tree (also runs before every push) |
 

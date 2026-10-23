@@ -22,6 +22,24 @@ export interface MarketSummary {
   bestBid: number | null;
   bestAsk: number | null;
   teams: string[];
+  gameStartTime: string | null;
+  sportsMarketType: string;
+  sides: Side[]; // [YES side, NO side]; for team markets each side names a team
+}
+
+export interface Side {
+  label: string;
+  long: boolean; // true = the YES (long) instrument
+  team: { name: string; safeName: string; alias: string; abbreviation: string } | null;
+}
+
+export interface EventSummary {
+  slug: string;
+  title: string;
+  endDate: string | null;
+  startTime: string | null;
+  category: string;
+  markets: MarketSummary[];
 }
 
 export interface Quote {
@@ -100,6 +118,26 @@ export function toMarketSummary(m: Json): MarketSummary {
     bestBid: num(m.bestBidQuote),
     bestAsk: num(m.bestAskQuote),
     teams: [...teams],
+    gameStartTime: m.gameStartTime ?? null,
+    sportsMarketType: m.sportsMarketType ?? '',
+    sides: (m.marketSides ?? [])
+      .map((x: Json) => ({
+        label: x.description ?? '',
+        long: Boolean(x.long),
+        team: x.team ? { name: x.team.name ?? '', safeName: x.team.safeName ?? '', alias: x.team.alias ?? '', abbreviation: x.team.abbreviation ?? '' } : null,
+      }))
+      .sort((a: Side, b: Side) => Number(b.long) - Number(a.long)),
+  };
+}
+
+export function toEventSummary(e: Json): EventSummary {
+  return {
+    slug: e.slug,
+    title: e.title ?? '',
+    endDate: e.endDate ?? null,
+    startTime: e.startTime ?? null,
+    category: e.category ?? '',
+    markets: (e.markets ?? []).map(toMarketSummary),
   };
 }
 
@@ -169,6 +207,8 @@ export interface ReadOnlyPolymarket {
   readonly authenticated: boolean;
   listMarkets(opts?: { active?: boolean; closed?: boolean; categories?: string[]; pageSize?: number; maxPages?: number }): Promise<MarketSummary[]>;
   market(slug: string): Promise<MarketSummary>;
+  event(slug: string): Promise<EventSummary | null>;
+  search(query: string, limit?: number): Promise<EventSummary[]>;
   quote(slug: string): Promise<Quote>;
   book(slug: string): Promise<Book>;
   balance(): Promise<Balance>;
@@ -177,20 +217,31 @@ export interface ReadOnlyPolymarket {
   activities(limit?: number): Promise<Json[]>;
 }
 
-export function createReadOnlyClient(creds?: { keyId?: string; secretKey?: string }): ReadOnlyPolymarket {
+export function createReadOnlyClient(creds?: { keyId?: string; secretKey?: string }, minIntervalMs = 250): ReadOnlyPolymarket {
   const keyId = creds?.keyId ?? process.env.POLYMARKET_KEY_ID;
   const secretKey = creds?.secretKey ?? process.env.POLYMARKET_SECRET_KEY;
   const authenticated = Boolean(keyId && secretKey);
   const client = new PolymarketUS(authenticated ? { keyId, secretKey } : {});
 
-  // The only network primitive in this module: a GET, retried on 429 with backoff.
+  // The only network primitive in this module: a GET, retried with backoff on rate limits and transient failures.
+  const transient = (err: any) =>
+    err?.status === 429 || err?.status >= 500 || ['RateLimitError', 'InternalServerError', 'APITimeoutError', 'APIConnectionError', 'AbortError', 'TypeError'].includes(err?.name);
+  // Cloudflare in front of the gateway throttles bursts well below the documented 25 requests/s,
+  // so requests are spaced client-wide (4/s by default) and retried for up to about 30 s.
+  let nextSlot = 0;
+  const throttle = async () => {
+    const wait = Math.max(0, nextSlot - Date.now());
+    nextSlot = Math.max(Date.now(), nextSlot) + minIntervalMs;
+    if (wait) await new Promise((r) => setTimeout(r, wait));
+  };
   const get = async (path: string, query?: Json, auth = false): Promise<Json> => {
     for (let attempt = 0; ; attempt++) {
+      await throttle();
       try {
         return await client.get<Json>(path, { query, authenticated: auth });
       } catch (err: any) {
-        if (err?.name !== 'RateLimitError' || attempt >= 3) throw err;
-        await new Promise((r) => setTimeout(r, 1000 * 2 ** attempt));
+        if (!transient(err) || attempt >= 4) throw err;
+        await new Promise((r) => setTimeout(r, 2000 * 2 ** attempt));
       }
     }
   };
@@ -216,6 +267,21 @@ export function createReadOnlyClient(creds?: { keyId?: string; secretKey?: strin
     async market(slug) {
       const r = await get(`/v1/market/slug/${encodeURIComponent(slug)}`);
       return toMarketSummary(r.market ?? r);
+    },
+
+    async event(slug) {
+      try {
+        const r = await get(`/v1/events/slug/${encodeURIComponent(slug)}`);
+        return toEventSummary(r.event ?? r);
+      } catch (err: any) {
+        if (err?.name === 'NotFoundError' || err?.status === 404) return null;
+        throw err;
+      }
+    },
+
+    async search(query, limit = 10) {
+      const r = await get('/v1/search', { query, limit });
+      return (r.events ?? []).map(toEventSummary);
     },
 
     async quote(slug) {

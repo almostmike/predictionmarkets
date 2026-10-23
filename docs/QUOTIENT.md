@@ -68,3 +68,17 @@ Allowed, attributed to Q with a link to quotient.social:
 - short excerpts of `headline`, `bluf`, and `crux`.
 
 Not allowed: full theses, evidence lists, or bulk data.
+
+## Matching to Polymarket US (`scripts/match.ts`)
+Observed on 2026-10-22 from one run: 263 Q forecasts (international Polymarket and Kalshi feeds, gap ≥ 5 points). Of those:
+- 32 sports games matched exactly;
+- 19 forecasts had text candidates needing review;
+- 212 had no US equivalent (earnings, AI rankings, most geopolitics).
+
+Each run costs about $0.04 of credits and takes about 4 minutes.
+- **Sports (confidence `high`):** a US game event uses the same slug as the international Polymarket game (`nfl-pit-no-2026-10-25`). Q's `game_key` gives the teams and date for Kalshi forecasts. The US winner market (`aec-…`) has two team sides; YES is the `long` side, which may be the opposite team from Q's `sports.yes_side`, so orientation is recorded as `same` or `flipped`.
+- **Everything else (confidence `review`):** US search by Q's question, filtered to events ending within 7 days of Q's deadline and scored by word overlap. The agent decides the match and the orientation.
+- **Rules comparison:** always by the agent, before `match.ts record`. Example: an NFL game settles the same way on both venues (overtime counts, a tie pays 50/50), but a game postponed more than two weeks settles at the last fair price on Polymarket US and stays open on international Polymarket.
+- **Flags** (any one blocks trading): `stale` (forecast over 48 hours old), `started` (game under way), `beyondHorizon`, `excluded`, `incoherent`, and `adverseMove`. `experimental` is shown but doesn't block; STRATEGY.md decides.
+- **Data checks:** contests are flagged when Q's YES probabilities across three or more sides sum above 1.25. On 2026-10-22 the DP World Tour Genesis Championship summed to 18.37 across 23 players, so the data is clearly wrong. Quotient's `market_odds` midpoint can also come from an empty book (`yes_bid` and `yes_ask` both null); we never use it.
+- **Throttling:** the Polymarket US gateway sits behind Cloudflare, which throttles bursts well below the documented 25 requests/s. The client spaces requests at 4/s and backs off for up to about 30 s.
