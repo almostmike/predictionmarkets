@@ -200,7 +200,7 @@ const START = 100;
 
 // Data lives in /data at the repo root. Locally (repo root served) it is ../data/; on GitHub Pages it is read from raw.
 async function load(name) {
-  for (const base of ['../data/', RAW]) {
+  for (const base of location.hostname.endsWith('github.io') ? [RAW] : ['../data/', RAW]) {
     try {
       const r = await fetch(base + name, { cache: 'no-store' });
       if (r.ok) return await r.text();
