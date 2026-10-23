@@ -9,7 +9,7 @@
 //       data/forecasts.jsonl with only the fields mandate rule 15 allows to be published.
 import { appendFileSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { parseArgs } from 'node:util';
-import { ROOT } from './lib/env.ts';
+import { DATA_DIR, ROOT } from './lib/env.ts';
 import { createReadOnlyClient } from './lib/polymarket.ts';
 import { eventKey, incoherentEvents, mispriced, preflight, type QForecast } from './lib/quotient.ts';
 import { type Candidate, type Orientation, flagsFor, matchByText, matchSports, price } from './lib/match.ts';
@@ -77,7 +77,7 @@ if (positionals[0] === 'record') {
     best_side: pricing.bestSide,
     edge_after_fees_pp: pricing.bestEdgePp,
   };
-  appendFileSync(`${ROOT}data/forecasts.jsonl`, JSON.stringify(record) + '\n');
+  appendFileSync(`${DATA_DIR}/forecasts.jsonl`, JSON.stringify(record) + '\n');
   console.log(JSON.stringify(record, null, 2));
   process.exit(0);
 }

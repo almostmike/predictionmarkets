@@ -2,7 +2,7 @@
 
 An AI agent (Claude) manages a $100 Polymarket US account using forecasts from Quotient (Q), and logs every decision here, including the days it doesn't trade. The mandate is [CLAUDE.md](CLAUDE.md); the public ledger is at https://almostmike.github.io/predictionmarkets/.
 
-**Status:** building. Phases 1–3 are done: scaffold, rules, secret scanning, read-only Polymarket US client, and Quotient matching. No account is funded and no orders can be placed.
+**Status:** building. Phases 1–4 are done: scaffold, rules, secret scanning, read-only Polymarket US client, Quotient matching, and the executor with guardrails. The account is funded, but `DRY_RUN` is on, so no orders are placed.
 
 ## Setup (operator's Mac)
 
@@ -24,9 +24,12 @@ Requires Node 22.18+ (TypeScript runs directly; there is no build step) and `git
 | `node scripts/match.ts` | Pull Q forecasts (about $0.04), propose Polymarket US matches, price them; writes `.cache/match/YYYY-MM-DD.json` |
 | `node scripts/match.ts record …` | Append an agent-confirmed match, with its rules comparison, to `data/forecasts.jsonl` |
 | `npm run quotient -- <cmd>` | The pinned Quotient CLI (add `--json`) |
+| `node scripts/execute.ts <proposals.json>` | The executor: checks each proposal against the hard rules, previews it with the exchange, and places it only when `DRY_RUN=false`. Logs every decision to `data/decisions.jsonl` |
 | `npm run reconcile` | Read-only account sync into `data/positions.json` and `data/nav.json` (needs keys) |
 | `npm run scan` | Secret scan of history and working tree (also runs before every push) |
 
 ## Layout
+
+Set `PM_DATA_DIR` to a scratch folder to rehearse without touching the public `data/` files. Create a file named `STOP` in the repo root to reject every order.
 
 See CLAUDE.md, "Repo layout." `config/rules.json` holds the machine-readable hard rules. `scripts/lib/polymarket.ts` is read-only by design and a test enforces that; only `scripts/execute.ts` (phase 4) will place orders.

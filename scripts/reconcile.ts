@@ -2,8 +2,9 @@
 // Writes data/positions.json and upserts today's row in data/nav.json.
 // Only sanitized fields are written: no account IDs, keys, or raw responses.
 import { readFileSync, writeFileSync } from 'node:fs';
-import { ROOT, loadEnv } from './lib/env.ts';
-import { createReadOnlyClient, markPosition } from './lib/polymarket.ts';
+import { DATA_DIR, loadEnv } from './lib/env.ts';
+import { createReadOnlyClient } from './lib/polymarket.ts';
+import { snapshot } from './lib/account.ts';
 import { ptDate } from './lib/time.ts';
 
 loadEnv();
@@ -13,46 +14,28 @@ if (!pm.authenticated) {
   process.exit(2);
 }
 
-const round = (n: number, d = 4) => Math.round(n * 10 ** d) / 10 ** d;
-
-const [balance, positions, openOrders] = await Promise.all([pm.balance(), pm.positions(), pm.openOrders()]);
-const open = positions.filter((p) => p.netContracts !== 0 && !p.expired);
-const quotes = await Promise.all(open.map((p) => pm.quote(p.slug).catch(() => null)));
-const meta = await Promise.all(open.map((p) => pm.market(p.slug).catch(() => null)));
-
-const rows = open.map((p, i) => {
-  const mark = markPosition(p, quotes[i]);
-  const contracts = Math.abs(p.netContracts);
-  return {
-    market: p.slug,
-    question: meta[i]?.question || p.title,
-    side: p.netContracts > 0 ? 'YES' : 'NO',
-    contracts: round(contracts),
-    avg_cost: contracts ? round(p.cost / contracts) : null,
-    cost: round(p.cost, 2),
-    mark,
-    value: mark === null ? null : round(mark * contracts, 2),
-    resolves_at: meta[i]?.endDate ?? null,
-  };
-});
-
-const unmarked = rows.filter((r) => r.value === null).map((r) => r.market);
-const positionsValue = rows.reduce((s, r) => s + (r.value ?? 0), 0);
-const now = new Date();
-const date = ptDate(now);
-const nav = round(balance.currentBalance + positionsValue, 2);
+const snap = await snapshot(pm);
+const date = ptDate(new Date(snap.asOf));
+const positionsValue = snap.positions.reduce((s, r) => s + (r.value ?? 0), 0);
 
 writeFileSync(
-  `${ROOT}data/positions.json`,
-  JSON.stringify({ as_of: now.toISOString(), cash: round(balance.currentBalance, 2), buying_power: round(balance.buyingPower, 2), open_orders: openOrders.length, positions: rows, unmarked }, null, 2) + '\n',
+  `${DATA_DIR}/positions.json`,
+  JSON.stringify({
+    as_of: snap.asOf,
+    cash: snap.cash,
+    buying_power: snap.buyingPower,
+    open_orders: snap.openOrders.length,
+    positions: snap.positions.map((r) => ({ market: r.slug, question: r.title, side: r.side, contracts: r.contracts, avg_cost: r.avgCost, cost: r.cost, mark: r.mark, value: r.value, resolves_at: r.resolvesAt })),
+    unmarked: snap.unmarked,
+  }, null, 2) + '\n',
 );
 
-const navPath = `${ROOT}data/nav.json`;
+const navPath = `${DATA_DIR}/nav.json`;
 const navFile = JSON.parse(readFileSync(navPath, 'utf8'));
 navFile.series = (navFile.series ?? []).filter((r: { date: string }) => r.date !== date);
-navFile.series.push({ date, nav, cash: round(balance.currentBalance, 2), positions_value: round(positionsValue, 2), open_positions: rows.length });
+navFile.series.push({ date, nav: snap.nav, cash: snap.cash, positions_value: Math.round(positionsValue * 100) / 100, open_positions: snap.positions.length });
 navFile.series.sort((a: { date: string }, b: { date: string }) => a.date.localeCompare(b.date));
 writeFileSync(navPath, JSON.stringify(navFile, null, 2) + '\n');
 
-console.log(JSON.stringify({ date, nav, cash: balance.currentBalance, open_positions: rows.length, open_orders: openOrders.length, unmarked }));
-if (unmarked.length) process.exitCode = 3; // a position without a price means NAV is incomplete: do not trade
+console.log(JSON.stringify({ date, nav: snap.nav, cash: snap.cash, buying_power: snap.buyingPower, open_positions: snap.positions.length, open_orders: snap.openOrders.length, unmarked: snap.unmarked }));
+if (snap.unmarked.length) process.exitCode = 3; // a position without a price means NAV is incomplete: do not trade
