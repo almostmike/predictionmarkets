@@ -1,6 +1,6 @@
 # CLAUDE.md — Prediction Markets: An AI Trades Prediction Markets with an Oracle
 
-Version 0.3 (2026-10-22). Approved by the operator on 2026-10-22.
+Version 0.4 (2026-10-22). Approved by the operator on 2026-10-22.
 
 ## What this is
 
@@ -19,6 +19,7 @@ One AI agent (Claude, run headless on a daily schedule) manages a $100 Polymarke
 
 - A friend of the operator works at Quotient. Quotient provided API access on its public terms; the operator pays for any Quotient credits. Quotient has no access to the trading account and no say in trades.
 - Quotient receives no fee, referral, or other compensation from this experiment or from any Polymarket US trade.
+- The $100 starting balance is a $75 deposit from the operator plus a $25 Polymarket US referral bonus credited on that deposit.
 - Q's forecasts are published here with Quotient's permission and attributed to Q, with a link to quotient.social.
 - Nothing here is investment advice. Every trade is the agent's decision, made under the operator's mandate.
 
@@ -27,7 +28,7 @@ One AI agent (Claude, run headless on a daily schedule) manages a $100 Polymarke
 The operator sets the mandate. The agent may not change it.
 
 1. **Objective:** grow the account. NAV against the $100 start is the headline number.
-2. **Capital:** $100. No deposits after the start and no withdrawals while the experiment runs.
+2. **Capital:** $100: a $75 deposit plus a $25 Polymarket US referral bonus, both counted as capital. No deposits after the start and no withdrawals while the experiment runs.
 3. **Venue:** trade on Polymarket US only, through its official API, from the operator's Mac in the US. Never trade on international Polymarket or any other venue, and never use a VPN or non-US infrastructure. Reading Q's forecasts for contracts on other venues (international Polymarket, Kalshi, HL Outcomes) is allowed; they are inputs, not trading venues.
 4. **Position cap:** a single market may not exceed **5% of current NAV** at the time of entry (about $5 at the start). Adding to a position counts toward the cap. If the venue's minimum order is larger than the cap allows, skip the market.
 5. **Open positions:** at most 15 at a time.
@@ -72,7 +73,8 @@ Each run does the following, in order:
 2. **Review holdings.** Get the latest Q forecast for each held market. Flag flips, resolutions, and exit conditions.
 3. **Scan.** Pull current Q forecasts and match each one to a Polymarket US market.
    - Q does not forecast Polymarket US contracts directly. Its forecasts are on the same events listed on international Polymarket, Kalshi, and HL Outcomes, so matching is by event.
-   - A match requires the same outcome, the same deadline, and resolution rules that cannot produce a different result. The agent reads both contracts' resolution text, records the comparison, and records no match if any of the three is uncertain. When a Quotient signal lists the Polymarket US contract with `settlement_match: exact`, that link counts as the rules comparison but is still logged.
+   - A match requires the same outcome, the same deadline, and resolution rules that produce the same result whenever the event takes place as scheduled. The agent reads both contracts' resolution text, records the comparison, and records no match if any of the three is uncertain.
+   - Rules that differ only in what happens if the event is postponed, delayed, suspended, or canceled (for example, one venue settling at the last fair price while the other waits or pays 50/50) still count as a match. The difference is logged as contingency-only in the match record. Any other difference means no match, including thresholds, inclusive versus exclusive bounds, timing, source, or tie handling. When a Quotient signal lists the Polymarket US contract with `settlement_match: exact`, that link counts as the rules comparison but is still logged.
    - For sports, the YES side comes from Q's `sports.yes_side`, never from titles or outcome order.
    - Use forecasts created within the last 48 hours only.
    - Not every forecast will have a market; that's expected.
@@ -182,5 +184,6 @@ Match the structure of agentstocks' "The Ledger." It is a static page that reads
 
 ## Amendments
 
+- **v0.4, 2026-10-22 (agent draft, approved by the operator 2026-10-22):** allowed matches whose resolution rules differ only on postponement, delay, suspension, or cancellation, logged as contingency-only (dry-run day 1 showed that v0.3's wording excluded every sports game, because the venues settle postponed or canceled games differently); disclosed that the $100 start includes a $25 Polymarket US referral bonus, and counted it as capital in rule 2.
 - **v0.3, 2026-10-22 (agent draft, approved by the operator 2026-10-22):** applied Quotient's answers of 2026-10-22. Filled in the disclosure (no compensation; not investment advice); made the CLI the only Quotient path; clarified that rule 3 bars trading elsewhere but allows reading Q's forecasts on other venues; tied rule 6 to the live Polymarket US book; set credits as the Quotient spending cap (rule 14); added rule 15 on what of Q's output may be published; changed matching to event level with a recorded rules comparison and a 48-hour forecast age limit; added Q's venue fields to the decision record; scored calibration on Polymarket US settlement; barred the CLI's keyless pay-per-call mode; added a backtest phase (3a); updated open items.
 - **v0.2, 2026-10-21 (agent draft, approved by the operator 2026-10-21):** named the experiment and repo; removed the end date and rewrote rule 12 as a 60-day horizon at entry; added rule 13 (no end date) and rule 14 (Quotient spend); excluded SDSU and SJSU, including athletics, and confirmed sports are allowed; defined the fee math in rule 6 and the price limit in rule 7; allowed Quotient's CLI as well as MCP; defined the oracle shadow; added the skip-the-day rule and dropped the separate notification; linked the operator's blog until the launch article exists; added phase 0 for the operator.

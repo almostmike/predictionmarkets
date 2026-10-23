@@ -11,12 +11,12 @@ Before starting: if the time is after 11:00 am PT on a scheduled run, exit witho
    - For each remaining candidate you'd consider a match, read both resolution texts:
      - Q's side: `q.resolution.criteria` in `.cache/match/<date>.json`.
      - Polymarket US: `node scripts/markets.ts <slug>`.
-   - Apply the mandate's match test (same outcome, same deadline, rules that can't produce a different result).
+   - Apply the mandate's match test: same outcome, same deadline, and rules that give the same result whenever the event takes place as scheduled. If the rules differ only on postponement, delay, suspension, or cancellation, it is still a match; record it with `--contingency-only` and describe the difference.
    - For text-search candidates, decide orientation yourself.
    - Record each confirmed match:
 
      ```
-     node scripts/match.ts record <q-market-key> <us-slug> --orientation same|flipped --rules "<comparison>"
+     node scripts/match.ts record <q-market-key> <us-slug> --orientation same|flipped --rules "<comparison>" [--contingency-only]
      ```
 4. **Decide.** Apply STRATEGY.md to the recorded matches and holdings. Write `.cache/proposals/<date>.json`:
    - with trades: `{ "proposals": [ … ] }`. Each proposal has the fields in `scripts/lib/guardrails.ts` (`Proposal`), a rationale of at most 100 words, and an exit condition.

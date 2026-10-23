@@ -4,9 +4,10 @@
 //       Pulls Q forecasts (about $0.02 per venue), proposes US matches, prices them against the live
 //       US book, and writes the working file .cache/match/YYYY-MM-DD.json (local only, never committed).
 //
-//   node scripts/match.ts record <q-market-key> <us-market-slug> --orientation same|flipped --rules "<comparison>"
+//   node scripts/match.ts record <q-market-key> <us-market-slug> --orientation same|flipped --rules "<comparison>" [--contingency-only]
 //       After the agent has compared both resolution texts, appends the confirmed match to
-//       data/forecasts.jsonl with only the fields mandate rule 15 allows to be published.
+//       data/forecasts.jsonl with only the fields mandate rule 15 allows to be published. Pass --contingency-only when
+//       the rules differ only on postponement, delay, suspension, or cancellation (CLAUDE.md v0.4, step 3).
 import { appendFileSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { parseArgs } from 'node:util';
 import { DATA_DIR, ROOT } from './lib/env.ts';
@@ -23,6 +24,7 @@ const { positionals, values } = parseArgs({
     'min-spread': { type: 'string', default: '5' },
     orientation: { type: 'string' },
     rules: { type: 'string' },
+    'contingency-only': { type: 'boolean', default: false },
   },
 });
 
@@ -43,7 +45,7 @@ if (positionals[0] === 'record') {
   const [, marketKey, usSlug] = positionals;
   const orientation = values.orientation as Orientation | undefined;
   if (!marketKey || !usSlug || (orientation !== 'same' && orientation !== 'flipped') || !values.rules?.trim()) {
-    console.error('usage: match.ts record <q-market-key> <us-market-slug> --orientation same|flipped --rules "<comparison>"');
+    console.error('usage: match.ts record <q-market-key> <us-market-slug> --orientation same|flipped --rules "<comparison>" [--contingency-only]');
     process.exit(1);
   }
   const work = JSON.parse(readFileSync(cachePath, 'utf8'));
@@ -69,7 +71,7 @@ if (positionals[0] === 'record') {
     market_id: usSlug,
     question: cand.usMarket.question || cand.usMarket.title,
     resolves_at: cand.usMarket.endDate,
-    match: { method: cand.method, confidence: cand.confidence, orientation, yes_side: q.sports?.yesSide ?? null, rules_comparison: values.rules.trim() },
+    match: { method: cand.method, confidence: cand.confidence, orientation, yes_side: q.sports?.yesSide ?? null, rules_comparison: values.rules.trim(), contingency_only_difference: values['contingency-only'] },
     us_prob_yes: pricing.usProbYes,
     bid: quote.bestBid,
     ask: quote.bestAsk,
