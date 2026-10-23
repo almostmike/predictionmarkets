@@ -1,1 +1,8 @@
-{ "as_of": null, "cash": null, "buying_power": null, "open_orders": 0, "positions": [], "unmarked": [] }
+{
+  "as_of": "2026-10-23T03:34:52.182Z",
+  "cash": 100,
+  "buying_power": 100,
+  "open_orders": 0,
+  "positions": [],
+  "unmarked": []
+}

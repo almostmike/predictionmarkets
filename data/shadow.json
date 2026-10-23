@@ -1,1 +1,14 @@
-{ "start_usd": 100, "cash": 100, "positions": [], "series": [] }
+{
+  "start_usd": 100,
+  "cash": 100,
+  "positions": [],
+  "series": [
+    {
+      "date": "2026-10-22",
+      "nav": 100,
+      "cash": 100,
+      "open_positions": 0
+    }
+  ],
+  "closed": []
+}

@@ -27,7 +27,20 @@ if (!input) {
   process.exit(1);
 }
 const parsed = JSON.parse(readFileSync(input, 'utf8'));
-const proposals: Proposal[] = Array.isArray(parsed) ? parsed : parsed.proposals;
+const proposals: Proposal[] = Array.isArray(parsed) ? parsed : (parsed.proposals ?? []);
+
+// "No trade today" is a decision too (CLAUDE.md, daily session step 4): { "proposals": [], "no_trade_reason": "..." }.
+if (!proposals.length) {
+  const reason = String(parsed.no_trade_reason ?? '').trim();
+  if (!reason) {
+    console.error('execute: no proposals and no no_trade_reason; nothing logged.');
+    process.exit(1);
+  }
+  const record = { id: randomUUID(), timestamp: new Date().toISOString(), action: 'none', status: 'no_trade', rationale: reason, dry_run: dryRun };
+  appendFileSync(decisionsPath, JSON.stringify(record) + '\n');
+  console.log(JSON.stringify(record, null, 2));
+  process.exit(0);
+}
 
 // New-entry dollars already sent today. In dry run, earlier dry-run entries count too, so a rehearsal
 // behaves like a live day; live runs count only orders that actually went out.

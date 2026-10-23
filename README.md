@@ -2,7 +2,7 @@
 
 An AI agent (Claude) manages a $100 Polymarket US account using forecasts from Quotient (Q), and logs every decision here, including the days it doesn't trade. The mandate is [CLAUDE.md](CLAUDE.md); the public ledger is at https://almostmike.github.io/predictionmarkets/.
 
-**Status:** building. Phases 1–4 are done: scaffold, rules, secret scanning, read-only Polymarket US client, Quotient matching, and the executor with guardrails. The account is funded, but `DRY_RUN` is on, so no orders are placed.
+**Status:** dry runs (phase 5). The account is funded, but `DRY_RUN` is on, so no orders are placed. The daily procedure is in [SESSION.md](SESSION.md); each day's notes are in [journal/](journal/).
 
 ## Setup (operator's Mac)
 
@@ -25,6 +25,8 @@ Requires Node 22.18+ (TypeScript runs directly; there is no build step) and `git
 | `node scripts/match.ts record …` | Append an agent-confirmed match, with its rules comparison, to `data/forecasts.jsonl` |
 | `npm run quotient -- <cmd>` | The pinned Quotient CLI (add `--json`) |
 | `node scripts/execute.ts <proposals.json>` | The executor: checks each proposal against the hard rules, previews it with the exchange, and places it only when `DRY_RUN=false`. Logs every decision to `data/decisions.jsonl` |
+| `node scripts/holdings.ts` | Review held markets against Q's latest forecast |
+| `node scripts/shadow.ts` | Update the oracle shadow portfolio in `data/shadow.json` |
 | `npm run reconcile` | Read-only account sync into `data/positions.json` and `data/nav.json` (needs keys) |
 | `npm run scan` | Secret scan of history and working tree (also runs before every push) |
 

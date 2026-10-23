@@ -203,6 +203,33 @@ export function markPosition(p: Position, q: Quote | null): number | null {
   return null;
 }
 
+export interface Fill {
+  trade_id: string;
+  time: string | null;
+  market: string;
+  price: number | null; // YES price, as the exchange reports it
+  contracts: number;
+  taker: boolean | null;
+  realized_pnl: number | null;
+  state: string;
+}
+
+// Trades from the activity feed. The feed does not say YES or NO; the position change does.
+export function toFill(a: Json): Fill | null {
+  const t = a.trade;
+  if (a.type !== 'ACTIVITY_TYPE_TRADE' || !t?.id) return null;
+  return {
+    trade_id: t.id,
+    time: t.createTime ?? t.updateTime ?? null,
+    market: t.marketSlug,
+    price: num(t.price),
+    contracts: Number(t.qtyDecimal ?? t.qty ?? 0),
+    taker: t.isAggressor ?? null,
+    realized_pnl: num(t.realizedPnl),
+    state: t.state ?? '',
+  };
+}
+
 export interface ReadOnlyPolymarket {
   readonly authenticated: boolean;
   listMarkets(opts?: { active?: boolean; closed?: boolean; categories?: string[]; pageSize?: number; maxPages?: number }): Promise<MarketSummary[]>;
@@ -215,6 +242,8 @@ export interface ReadOnlyPolymarket {
   positions(): Promise<Position[]>;
   openOrders(): Promise<OpenOrder[]>;
   activities(limit?: number): Promise<Json[]>;
+  fills(limit?: number): Promise<Fill[]>;
+  settlement(slug: string): Promise<{ price: number; settledAt: string | null } | null>;
 }
 
 export function createReadOnlyClient(creds?: { keyId?: string; secretKey?: string }, minIntervalMs = 250): ReadOnlyPolymarket {
@@ -319,6 +348,23 @@ export function createReadOnlyClient(creds?: { keyId?: string; secretKey?: strin
       requireAuth();
       const r = await get('/v1/portfolio/activities', { limit }, true);
       return r.activities ?? [];
+    },
+
+    async fills(limit = 200) {
+      requireAuth();
+      const r = await get('/v1/portfolio/activities', { limit, types: ['ACTIVITY_TYPE_TRADE'] }, true);
+      return (r.activities ?? []).map(toFill).filter((f: Fill | null): f is Fill => f !== null);
+    },
+
+    async settlement(slug) {
+      try {
+        const r = await get(`/v1/markets/${encodeURIComponent(slug)}/settlement`);
+        const price = num(r.settlementPrice ?? r.settlement);
+        return price === null ? null : { price, settledAt: r.settledAt ?? null };
+      } catch (err: any) {
+        if (err?.name === 'NotFoundError' || err?.status === 404) return null; // not settled yet
+        throw err;
+      }
     },
   };
 }

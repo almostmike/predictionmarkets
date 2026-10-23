@@ -54,3 +54,10 @@ test('live public endpoints (set LIVE=1)', { skip: process.env.LIVE !== '1' }, a
   assert.equal(q.slug, slug);
   assert.ok(Array.isArray(b.bids));
 });
+
+test('fills come from trade activities only; settlement prices parse', async () => {
+  const { toFill } = await import('../scripts/lib/polymarket.ts');
+  assert.equal(toFill({ type: 'ACTIVITY_TYPE_ACCOUNT_DEPOSIT', accountBalanceChange: {} }), null);
+  const f = toFill({ type: 'ACTIVITY_TYPE_TRADE', trade: { id: 't1', marketSlug: 'm', state: 'TRADE_STATE_CLEARED', createTime: '2026-10-23T16:00:00Z', price: { value: '0.6225' }, qtyDecimal: '12.00', isAggressor: true, realizedPnl: null } })!;
+  assert.deepEqual([f.trade_id, f.price, f.contracts, f.taker, f.realized_pnl], ['t1', 0.6225, 12, true, null]);
+});
