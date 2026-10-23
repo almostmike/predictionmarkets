@@ -1,13 +1,64 @@
 {
   "start_usd": 100,
-  "cash": 100,
-  "positions": [],
+  "cash": 80,
+  "positions": [
+    {
+      "market": "aec-nba-was-chi-2026-10-24",
+      "side": "NO",
+      "contracts": 10.05,
+      "price": 0.48,
+      "cost": 5,
+      "entered": "2026-10-23",
+      "q_forecast_id": "2f1ceb59-522c-469b-9a79-f37ba23e3fc1",
+      "q_prob_side": 0.63,
+      "mark": 0.45
+    },
+    {
+      "market": "aec-nfl-pit-no-2026-10-25",
+      "side": "YES",
+      "contracts": 7.79,
+      "price": 0.625,
+      "cost": 5,
+      "entered": "2026-10-23",
+      "q_forecast_id": "f417a25c-bd6e-4688-80b9-b68d75997bf8",
+      "q_prob_side": 0.77,
+      "mark": 0.6225
+    },
+    {
+      "market": "aec-cfb-okl-mspst-2026-10-24",
+      "side": "YES",
+      "contracts": 8.04,
+      "price": 0.605,
+      "cost": 5,
+      "entered": "2026-10-23",
+      "q_forecast_id": "5c415839-1ab3-4158-ad3a-194e545fffed",
+      "q_prob_side": 0.76,
+      "mark": 0.6
+    },
+    {
+      "market": "aec-nba-por-sac-2026-10-23",
+      "side": "NO",
+      "contracts": 22.57,
+      "price": 0.21,
+      "cost": 5,
+      "entered": "2026-10-23",
+      "q_forecast_id": "d14b554a-06b2-4622-8c5e-4f94a5503cae",
+      "q_prob_side": 0.35,
+      "mark": 0.2
+    }
+  ],
   "series": [
     {
       "date": "2026-10-22",
       "nav": 100,
       "cash": 100,
       "open_positions": 0
+    },
+    {
+      "date": "2026-10-23",
+      "nav": 98.71,
+      "cash": 80,
+      "open_positions": 4
     }
   ],
   "closed": []

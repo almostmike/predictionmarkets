@@ -20,6 +20,7 @@ s.positions ??= [];
 s.closed ??= [];
 s.series ??= [];
 const r2 = (x: number) => Math.round(x * 100) / 100;
+const r4 = (x: number) => Math.round(x * 10000) / 10000;
 
 // 1. Settle anything that has resolved.
 for (const p of [...s.positions]) {
@@ -43,7 +44,7 @@ for (const f of logged.filter((x) => ptDate(new Date(x.logged_at)) === today)) {
   if (s.positions.length >= rules.max_open_positions) break;
   if (!f.resolves_at || daysUntil(f.resolves_at) > rules.max_days_to_resolution) continue;
   if (exclusionHits(rules, [f.question, f.q_question]).length) continue;
-  const price = f.best_side === 'YES' ? f.ask : 1 - f.bid;
+  const price = f.best_side === 'YES' ? f.ask : f.bid === null ? null : r4(1 - f.bid);
   if (price === null || !(price > 0 && price < 1)) continue;
   const unit = price + takerFeePerContract(rules, price);
   const contracts = Math.floor((STAKE / unit) * 100) / 100;
@@ -60,7 +61,7 @@ for (const f of logged.filter((x) => ptDate(new Date(x.logged_at)) === today)) {
 let value = 0;
 for (const p of s.positions) {
   const q = await pm.quote(p.market).catch(() => null);
-  const mark = !q ? null : p.side === 'YES' ? q.bestBid : q.bestAsk === null ? null : 1 - q.bestAsk;
+  const mark = !q ? null : p.side === 'YES' ? q.bestBid : q.bestAsk === null ? null : r4(1 - q.bestAsk);
   p.mark = mark;
   value += mark === null ? p.cost : p.contracts * mark; // unpriced positions held at cost
 }
