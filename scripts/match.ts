@@ -11,7 +11,7 @@
 import { appendFileSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { parseArgs } from 'node:util';
 import { DATA_DIR, ROOT } from './lib/env.ts';
-import { createReadOnlyClient } from './lib/polymarket.ts';
+import { createReadOnlyClient, sideLabels } from './lib/polymarket.ts';
 import { eventKey, incoherentEvents, mispriced, preflight, type QForecast } from './lib/quotient.ts';
 import { type Candidate, type Orientation, flagsFor, matchByText, matchSports, price } from './lib/match.ts';
 import { loadRules } from './lib/rules.ts';
@@ -70,6 +70,7 @@ if (positionals[0] === 'record') {
     q_coverage: q.coverage,
     market_id: usSlug,
     question: cand.usMarket.question || cand.usMarket.title,
+    us_side_labels: sideLabels(cand.usMarket),
     resolves_at: cand.usMarket.endDate,
     match: { method: cand.method, confidence: cand.confidence, orientation, yes_side: q.sports?.yesSide ?? null, rules_comparison: values.rules.trim(), contingency_only_difference: values['contingency-only'] },
     us_prob_yes: pricing.usProbYes,

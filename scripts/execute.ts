@@ -10,7 +10,7 @@ import { appendFileSync, existsSync, readFileSync } from 'node:fs';
 import { randomUUID } from 'node:crypto';
 import { PolymarketUS } from 'polymarket-us';
 import { DATA_DIR, ROOT, isDryRun, loadEnv } from './lib/env.ts';
-import { createReadOnlyClient } from './lib/polymarket.ts';
+import { createReadOnlyClient, sideLabels } from './lib/polymarket.ts';
 import { type Snapshot, snapshot } from './lib/account.ts';
 import { type Context, type Proposal, type Violation, buildOrder, checkProposal, edgeAfterFeesPp, entryCost, sideQuote } from './lib/guardrails.ts';
 import { loadRules } from './lib/rules.ts';
@@ -98,6 +98,7 @@ for (const p of proposals) {
     question: market?.question || market?.title || null,
     resolves_at: market?.endDate ?? null,
     side: p.side,
+    side_label: market ? sideLabels(market)[p.side] : null,
     limit_price: p.limit_price,
     quantity: p.quantity,
     q_forecast_id: p.q_forecast_id ?? null,

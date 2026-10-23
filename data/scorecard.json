@@ -1,0 +1,23 @@
+{
+  "as_of": "2026-10-23T15:43:45.564Z",
+  "logged_markets": 22,
+  "resolved": [],
+  "brier": {
+    "q": {
+      "n": 0,
+      "score": null
+    },
+    "market": {
+      "n": 0,
+      "score": null
+    },
+    "agent_where_it_differs": {
+      "n": 0,
+      "score": null
+    },
+    "q_on_same_markets": {
+      "n": 0,
+      "score": null
+    }
+  }
+}

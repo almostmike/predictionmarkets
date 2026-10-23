@@ -130,6 +130,12 @@ export function toMarketSummary(m: Json): MarketSummary {
   };
 }
 
+// What YES and NO pay on, in words (e.g. "Steelers" / "Saints"); null for plain Yes/No contracts.
+export function sideLabels(m: MarketSummary): { YES: string | null; NO: string | null } {
+  const named = (s?: Side) => (s && !/^(yes|no)$/i.test(s.label) ? s.label : null);
+  return { YES: named(m.sides.find((s) => s.long)), NO: named(m.sides.find((s) => !s.long)) };
+}
+
 export function toEventSummary(e: Json): EventSummary {
   return {
     slug: e.slug,

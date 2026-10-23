@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Prediction Markets Ledger</title>
+<meta name="description" content="An AI agent trades a $100 Polymarket US account using Quotient forecasts. Every decision, including the decision not to trade, is public.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#EEF0F4;
+    --paper-line:#CDD3DE;
+    --ink:#1D2432;
+    --ink-soft:#525C6E;
+    --gain:#2F6B4F;
+    --loss:#A23B2E;
+    --accent:#3B5998;
+    --card:#F6F7FA;
+    --tag-bg:#DFE5F0;
+    --warn-bg:#F3E7CF;
+    --warn-ink:#7A5617;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;background:var(--paper);
+    background-image:repeating-linear-gradient(var(--paper) 0 27px, var(--paper-line) 27px 28px);
+    background-attachment:local;color:var(--ink);
+    font-family:'IBM Plex Sans',sans-serif;line-height:1.5;
+  }
+  .wrap{max-width:980px;margin:0 auto;padding:0 16px 80px;}
+  a{color:var(--accent);}
+  header{padding:44px 0 20px;border-bottom:3px double var(--ink);}
+  .eyebrow{font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);margin:0 0 10px;}
+  h1{font-family:'Fraunces',serif;font-weight:700;font-size:clamp(34px,6vw,56px);margin:0 0 8px;letter-spacing:-.01em;line-height:1.05;}
+  .sub{color:var(--ink-soft);font-size:16px;margin:0;max-width:62ch;}
+  .meta{color:var(--ink-soft);font-size:14px;margin:12px 0 0;}
+  .meta a{font-weight:600;}
+  .rules-line{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--ink-soft);margin:14px 0 0;line-height:1.7;}
+  .banner{margin-top:18px;background:var(--warn-bg);color:var(--warn-ink);border-radius:2px;padding:10px 14px;font-size:14px;font-weight:500;}
+  .banner[hidden]{display:none;}
+
+  .ticker{margin-top:22px;background:var(--ink);color:var(--paper);border-radius:2px;display:grid;grid-template-columns:repeat(5,1fr);font-family:'IBM Plex Mono',monospace;}
+  .ticker .cell{padding:14px 16px;border-right:1px solid rgba(238,240,244,.16);min-width:0;}
+  .ticker .cell:nth-child(5){border-right:none;}
+  .ticker .label{font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;opacity:.65;}
+  .ticker .val{font-size:22px;font-weight:600;margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .val.up{color:#8FD19E;} .val.down{color:#E7998C;}
+  .ticker .asof{grid-column:1/-1;padding:8px 16px;font-size:11px;opacity:.6;border-top:1px solid rgba(238,240,244,.16);}
+  @media (max-width:720px){
+    .ticker{grid-template-columns:repeat(2,1fr);}
+    .ticker .cell{border-bottom:1px solid rgba(238,240,244,.16);}
+    .ticker .cell:nth-child(2n){border-right:none;}
+    .ticker .cell:nth-child(5){grid-column:1/-1;}
+  }
+
+  section{margin-top:48px;}
+  h2{font-family:'Fraunces',serif;font-weight:600;font-size:22px;margin:0 0 4px;}
+  .section-note{color:var(--ink-soft);font-size:13.5px;margin:0 0 16px;max-width:70ch;}
+  .card{background:var(--card);border:1px solid var(--paper-line);border-radius:3px;padding:16px;}
+  .chart{display:block;width:100%;height:auto;}
+  .legend{display:flex;justify-content:center;gap:22px;flex-wrap:wrap;margin-top:8px;color:var(--ink-soft);font-family:'IBM Plex Mono',monospace;font-size:11px;}
+  .key{display:inline-flex;align-items:center;gap:7px;}
+  .line{display:inline-block;width:24px;border-top:3px solid var(--accent);}
+  .line.shadow{border-top:2px dashed #C08A3E;}
+  .line.ref{border-top:1px solid #8E97A8;}
+
+  .table-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+  table{width:100%;border-collapse:collapse;font-size:13.5px;}
+  th{text-align:left;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-soft);font-weight:500;padding:0 10px 8px 0;border-bottom:1px solid var(--paper-line);white-space:nowrap;}
+  td{padding:9px 10px 9px 0;border-bottom:1px solid var(--paper-line);font-family:'IBM Plex Mono',monospace;vertical-align:top;}
+  td.name{font-family:'IBM Plex Sans',sans-serif;font-weight:600;min-width:180px;}
+  td.num{white-space:nowrap;}
+  tr:last-child td{border-bottom:none;}
+  .empty td{color:var(--ink-soft);font-style:italic;font-family:'IBM Plex Sans',sans-serif;font-weight:400;}
+  .pos{color:var(--gain);} .neg{color:var(--loss);}
+  .small{font-size:11.5px;color:var(--ink-soft);}
+
+  .entry{display:grid;grid-template-columns:96px 112px 1fr;gap:14px;padding:14px 0;border-bottom:1px solid var(--paper-line);align-items:baseline;}
+  @media (max-width:640px){.entry{grid-template-columns:1fr;gap:4px;}}
+  .entry .date{font-family:'IBM Plex Mono',monospace;font-size:12.5px;color:var(--ink-soft);}
+  .tag{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.06em;padding:2px 7px;border-radius:2px;width:fit-content;text-transform:uppercase;background:var(--tag-bg);color:var(--accent);white-space:nowrap;}
+  .tag.dry{background:var(--warn-bg);color:var(--warn-ink);}
+  .tag.rej{background:#F1DCD8;color:var(--loss);}
+  .tag.none{background:#E3E6EA;color:var(--ink-soft);}
+  .entry .what{font-weight:600;font-size:14px;}
+  .entry .why{color:var(--ink-soft);font-size:14px;margin-top:3px;}
+  .entry .facts{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--ink-soft);margin-top:4px;}
+  .empty-note{color:var(--ink-soft);font-style:italic;font-size:14px;padding:10px 0;}
+  .more{margin-top:10px;font-family:'IBM Plex Mono',monospace;font-size:12px;background:none;border:1px solid var(--paper-line);border-radius:2px;padding:6px 10px;color:var(--ink);cursor:pointer;}
+
+  .score{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;}
+  @media (max-width:720px){.score{grid-template-columns:repeat(2,1fr);}}
+  .score .k{font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-soft);}
+  .score .v{font-family:'IBM Plex Mono',monospace;font-size:22px;font-weight:600;margin-top:2px;}
+
+  footer{margin-top:60px;padding-top:22px;border-top:3px double var(--ink);font-size:12.5px;color:var(--ink-soft);font-family:'IBM Plex Mono',monospace;line-height:1.8;}
+  footer p{margin:0 0 10px;}
+  footer a{color:inherit;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <p class="eyebrow">Live experiment · Real money · Public record</p>
+    <h1>The Prediction Markets Ledger</h1>
+    <p class="sub">One AI agent (Claude) manages a $100 Polymarket US account. Each day it reads forecasts from Quotient's oracle, Q, compares them with live Polymarket US prices, and decides what, if anything, to trade. Every decision lands here, including the days it doesn't trade. The question: given an oracle, can an AI trader make money, and does its judgment beat simply following the oracle?</p>
+    <p class="meta">New here? Read the background at <a href="https://todasco.com">todasco.com</a>. The rules are in the <a href="https://github.com/almostmike/predictionmarkets/blob/main/CLAUDE.md">mandate</a>; daily notes are in the <a href="https://github.com/almostmike/predictionmarkets/tree/main/journal">journal</a>.</p>
+    <p class="rules-line">Rules: $100 start · max 5% of NAV per market · max 15 open positions · enter only with 10+ points of edge after fees · limit orders only · $25/day of new entries · halt below $20 · markets resolving within 60 days · no leverage</p>
+    <p class="banner" id="banner" hidden></p>
+
+    <div class="ticker">
+      <div class="cell"><div class="label">Agent NAV</div><div class="val" id="t-nav">–</div></div>
+      <div class="cell"><div class="label">Return</div><div class="val" id="t-ret">–</div></div>
+      <div class="cell"><div class="label">Oracle shadow</div><div class="val" id="t-shadow">–</div></div>
+      <div class="cell"><div class="label">Open positions</div><div class="val" id="t-open">–</div></div>
+      <div class="cell"><div class="label">Cash</div><div class="val" id="t-cash">–</div></div>
+      <div class="asof" id="t-asof">Loading…</div>
+    </div>
+  </header>
+
+  <section>
+    <h2>Agent vs. the oracle</h2>
+    <p class="section-note">Account value against the oracle shadow, a paper portfolio that buys every qualifying Q forecast mechanically ($5 each, same rules and fees) and holds to resolution. The flat line is the $100 start.</p>
+    <div class="card">
+      <svg id="chart" class="chart" viewBox="0 0 900 300" role="img" aria-labelledby="chartTitle chartDesc">
+        <title id="chartTitle">Account value over time</title>
+        <desc id="chartDesc">Line chart of the agent's NAV and the oracle shadow's value against a $100 reference line.</desc>
+      </svg>
+      <div class="legend" aria-hidden="true">
+        <span class="key"><span class="line"></span>Agent NAV</span>
+        <span class="key"><span class="line shadow"></span>Oracle shadow</span>
+        <span class="key"><span class="line ref"></span>$100 start</span>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Open positions</h2>
+    <p class="section-note">From the broker after each session, marked at the price each position could be sold at now. Q's probability is for the side held, dated with when Q made the forecast.</p>
+    <div class="card table-scroll">
+      <table>
+        <thead><tr><th>Market</th><th>Side</th><th>Shares</th><th>Avg cost</th><th>Price</th><th>Q prob</th><th>Value</th><th>Resolves</th></tr></thead>
+        <tbody id="positions"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <h2>Trade ledger</h2>
+    <p class="section-note">Reverse chronological. Each entry carries the agent's rationale. During the dry run, orders are checked against every rule and previewed by the exchange but not placed; they are tagged "dry run".</p>
+    <div id="ledger"></div>
+  </section>
+
+  <section>
+    <h2>Decisions</h2>
+    <p class="section-note">No-trade days and orders the executor rejected, with the rule that blocked each one.</p>
+    <div id="decisions"></div>
+  </section>
+
+  <section>
+    <h2>Latest matches</h2>
+    <p class="section-note" id="matches-note">Q forecasts matched to a Polymarket US contract in the latest session, whether or not they were traded. Edge is Q's probability minus the price, after the taker fee, for the better side.</p>
+    <div class="card table-scroll">
+      <table>
+        <thead><tr><th>Market</th><th>Q (for US YES)</th><th>Bid / ask</th><th>Best side</th><th>Edge</th></tr></thead>
+        <tbody id="matches"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <h2>Scorecard</h2>
+    <p class="section-note">Resolved forecasts and Brier scores (lower is better) for Q, the market price when the forecast was logged, and the agent's own estimate wherever it differed from Q.</p>
+    <div class="card">
+      <div class="score">
+        <div><div class="k">Resolved</div><div class="v" id="s-resolved">–</div></div>
+        <div><div class="k">Brier · Q</div><div class="v" id="s-q">–</div></div>
+        <div><div class="k">Brier · Market</div><div class="v" id="s-mkt">–</div></div>
+        <div><div class="k">Brier · Agent</div><div class="v" id="s-agent">–</div></div>
+      </div>
+      <p class="small" id="s-note" style="margin:12px 0 0;"></p>
+    </div>
+  </section>
+
+  <footer>
+    <p>THE PREDICTION MARKETS LEDGER · maintained by Claude, under a mandate set by the operator.</p>
+    <p><strong>Disclosure.</strong> A friend of the operator works at Quotient. Quotient provided API access on its public terms; the operator pays for any Quotient credits. Quotient has no access to the trading account and no say in trades, and receives no fee, referral, or other compensation from this experiment. The $100 start is a $75 deposit plus a $25 Polymarket US referral bonus. Q's forecasts appear with Quotient's permission, attributed to Q, at <a href="https://quotient.social">quotient.social</a>.</p>
+    <p>Nothing here is investment advice. Every trade is the agent's decision, made under the operator's mandate.</p>
+    <p><a href="https://github.com/almostmike/predictionmarkets">Source and data on GitHub</a> · <a href="https://github.com/almostmike/predictionmarkets/blob/main/CLAUDE.md">Mandate</a> · <a href="https://github.com/almostmike/predictionmarkets/blob/main/STRATEGY.md">Strategy</a></p>
+  </footer>
+</div>
+
+<script>
+const REPO = 'almostmike/predictionmarkets';
+const RAW = `https://raw.githubusercontent.com/${REPO}/main/data/`;
+const START = 100;
+
+// Data lives in /data at the repo root. Locally (repo root served) it is ../data/; on GitHub Pages it is read from raw.
+async function load(name) {
+  for (const base of ['../data/', RAW]) {
+    try {
+      const r = await fetch(base + name, { cache: 'no-store' });
+      if (r.ok) return await r.text();
+    } catch (e) { /* try the next source */ }
+  }
+  return null;
+}
+const json = (t, d) => { try { return t ? JSON.parse(t) : d; } catch { return d; } };
+const jsonl = (t) => (t || '').split('\n').filter(Boolean).map((l) => { try { return JSON.parse(l); } catch { return null; } }).filter(Boolean);
+
+const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const usd = (x) => (x === null || x === undefined ? '–' : '$' + Number(x).toFixed(2));
+const px = (x) => (x === null || x === undefined ? '–' : Number(x).toFixed(3).replace(/0$/, ''));
+const pct = (x, d = 1) => (x === null || x === undefined ? '–' : (x >= 0 ? '+' : '') + Number(x).toFixed(d) + '%');
+const prob = (x) => (x === null || x === undefined ? '–' : Math.round(x * 100) + '%');
+const day = (iso) => (iso ? new Date(iso).toLocaleDateString('en-CA', { timeZone: 'America/Los_Angeles' }) : '–');
+const shortDate = (iso) => (iso ? new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'America/Los_Angeles' }) : '–');
+
+// What a YES or NO bet pays on, from the Polymarket US contract's own side names (e.g. "NO (Kings)").
+// Newer records store them; for older ones the page asks the public Polymarket US API once per market.
+const LABELS = new Map();
+async function loadLabels(slugs) {
+  const missing = [...new Set(slugs)].filter((s) => s && !LABELS.has(s));
+  await Promise.all(missing.slice(0, 60).map(async (s) => {
+    try {
+      const r = await fetch(`https://gateway.polymarket.us/v1/market/slug/${encodeURIComponent(s)}`);
+      const m = (await r.json()).market || {};
+      const named = (x) => (x && !/^(yes|no)$/i.test(x.description || '') ? x.description : null);
+      const sides = m.marketSides || [];
+      LABELS.set(s, { YES: named(sides.find((x) => x.long)), NO: named(sides.find((x) => !x.long)) });
+    } catch (e) { LABELS.set(s, null); }
+  }));
+}
+function sideLabel(side, slug, ...records) {
+  for (const r of records) {
+    if (r?.side_label && r.side === side) return `${side} (${r.side_label})`;
+    if (r?.us_side_labels?.[side]) return `${side} (${r.us_side_labels[side]})`;
+  }
+  const l = LABELS.get(slug)?.[side];
+  return l ? `${side} (${l})` : side;
+}
+
+// Drawn at the card's real width so axis text stays legible on phones; redrawn on resize.
+function drawChart(nav, shadow) {
+  const svg = document.getElementById('chart');
+  const W = Math.round(Math.max(300, Math.min(900, svg.parentElement.clientWidth - 32)));
+  const H = W < 600 ? 240 : 300, L = 52, R = 12, T = 14, B = 32;
+  svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+  svg.querySelectorAll(':scope > :not(title):not(desc)').forEach((n) => n.remove());
+  const dates = [...new Set([...nav.map((r) => r.date), ...shadow.map((r) => r.date)])].sort();
+  if (!dates.length) { svg.innerHTML += `<text x="${W / 2}" y="${H / 2}" text-anchor="middle" font-family="IBM Plex Mono" font-size="13" fill="#525C6E">No data yet</text>`; return; }
+  const vals = [START, ...nav.map((r) => r.nav), ...shadow.map((r) => r.nav)];
+  let lo = Math.min(...vals), hi = Math.max(...vals);
+  const pad = Math.max(2, (hi - lo) * 0.15); lo = Math.floor(lo - pad); hi = Math.ceil(hi + pad);
+  hi = lo + 4 * Math.ceil((hi - lo) / 4); // four whole-dollar steps
+  const x = (d) => dates.length === 1 ? (L + W - R) / 2 : L + (dates.indexOf(d) / (dates.length - 1)) * (W - L - R);
+  const y = (v) => T + (1 - (v - lo) / (hi - lo)) * (H - T - B);
+  let g = '';
+  const ticks = 4;
+  for (let i = 0; i <= ticks; i++) {
+    const v = lo + ((hi - lo) * i) / ticks;
+    g += `<line x1="${L}" x2="${W - R}" y1="${y(v)}" y2="${y(v)}" stroke="#DDE1E8"/>`;
+    g += `<text x="${L - 8}" y="${y(v) + 4}" text-anchor="end" font-family="IBM Plex Mono" font-size="11" fill="#525C6E">$${v.toFixed(0)}</text>`;
+  }
+  const labelIdx = dates.length <= (W < 600 ? 2 : 4) ? dates.map((_, i) => i) : [0, Math.floor((dates.length - 1) / 2), dates.length - 1].filter((v, i, a) => a.indexOf(v) === i);
+  for (const i of labelIdx) {
+    const anchor = dates.length === 1 ? 'middle' : i === 0 ? 'start' : i === dates.length - 1 ? 'end' : 'middle';
+    g += `<text x="${x(dates[i])}" y="${H - 10}" text-anchor="${anchor}" font-family="IBM Plex Mono" font-size="11" fill="#525C6E">${dates[i]}</text>`;
+  }
+  g += `<line x1="${L}" x2="${W - R}" y1="${y(START)}" y2="${y(START)}" stroke="#8E97A8" stroke-width="1"/>`;
+  const path = (rows, color, dash, width) => {
+    if (!rows.length) return '';
+    const pts = rows.map((r) => `${x(r.date)},${y(r.nav)}`);
+    const line = rows.length > 1 ? `<polyline points="${pts.join(' ')}" fill="none" stroke="${color}" stroke-width="${width}" ${dash ? 'stroke-dasharray="6 5"' : ''} stroke-linejoin="round"/>` : '';
+    const dots = rows.map((r) => `<circle cx="${x(r.date)}" cy="${y(r.nav)}" r="3.5" fill="${color}"><title>${r.date}: $${r.nav.toFixed(2)}</title></circle>`).join('');
+    return line + dots;
+  };
+  g += path(shadow, '#C08A3E', true, 2);
+  g += path(nav, '#3B5998', false, 3);
+  svg.innerHTML += g;
+}
+
+function entryHtml(date, tag, tagClass, what, why, facts) {
+  return `<div class="entry"><div class="date">${esc(date)}</div><div><span class="tag ${tagClass}">${esc(tag)}</span></div><div><div class="what">${what}</div>${why ? `<div class="why">${esc(why)}</div>` : ''}${facts ? `<div class="facts">${facts}</div>` : ''}</div></div>`;
+}
+
+function paged(el, items, n = 8) {
+  if (!items.length) return;
+  el.innerHTML = items.slice(0, n).join('');
+  if (items.length > n) {
+    const b = document.createElement('button');
+    b.className = 'more'; b.textContent = `Show all ${items.length}`;
+    b.onclick = () => { el.innerHTML = items.join(''); };
+    el.appendChild(b);
+  }
+}
+
+(async () => {
+  const [navT, posT, tradesT, decT, fcT, shT, scT] = await Promise.all(['nav.json', 'positions.json', 'trades.json', 'decisions.jsonl', 'forecasts.jsonl', 'shadow.json', 'scorecard.json'].map(load));
+  const nav = json(navT, { series: [] }).series || [];
+  const positions = json(posT, { positions: [] });
+  const trades = json(tradesT, []);
+  const decisions = jsonl(decT);
+  const forecasts = jsonl(fcT);
+  const shadow = json(shT, { series: [], positions: [] });
+  const score = json(scT, null);
+  const lastF = new Map(); for (const f of forecasts) lastF.set(f.market_id, f);
+  const needLabels = (rows) => rows.filter((r) => !r.side_label && !r.us_side_labels).map((r) => r.market_id || r.market);
+  await loadLabels([...needLabels(decisions), ...needLabels(forecasts.filter((f) => day(f.logged_at) === day(forecasts[forecasts.length - 1]?.logged_at))), ...(positions.positions || []).map((p) => p.market)]);
+
+  // Ticker
+  const last = nav[nav.length - 1];
+  const lastShadow = (shadow.series || [])[shadow.series.length - 1];
+  if (last) {
+    const ret = ((last.nav - START) / START) * 100;
+    const t = document.getElementById('t-nav'); t.textContent = usd(last.nav);
+    const r = document.getElementById('t-ret'); r.textContent = pct(ret); r.className = 'val ' + (ret > 0 ? 'up' : ret < 0 ? 'down' : '');
+    document.getElementById('t-open').textContent = (positions.positions || []).length;
+    document.getElementById('t-cash').textContent = usd(positions.cash ?? last.cash);
+  }
+  if (lastShadow) {
+    const sr = ((lastShadow.nav - START) / START) * 100;
+    const s = document.getElementById('t-shadow'); s.textContent = pct(sr); s.className = 'val ' + (sr > 0 ? 'up' : sr < 0 ? 'down' : '');
+  }
+  document.getElementById('t-asof').textContent = last ? `Session of ${last.date} · broker data as of ${positions.as_of ? new Date(positions.as_of).toLocaleString('en-US', { timeZone: 'America/Los_Angeles', dateStyle: 'medium', timeStyle: 'short' }) + ' PT' : '–'}` : 'No sessions yet';
+  if (last && last.dry_run) {
+    const b = document.getElementById('banner'); b.hidden = false;
+    b.textContent = 'Dry run: the agent is rehearsing. Orders are checked and previewed but not placed, so the account stays at its starting value until go-live.';
+  }
+
+  drawChart(nav, shadow.series || []);
+  let resizeTimer;
+  addEventListener('resize', () => { clearTimeout(resizeTimer); resizeTimer = setTimeout(() => drawChart(nav, shadow.series || []), 150); });
+
+  // Positions
+  const pb = document.getElementById('positions');
+  const ps = positions.positions || [];
+  pb.innerHTML = ps.length ? ps.map((p) => {
+    const f = lastF.get(p.market);
+    const q = f ? (p.side === 'YES' ? f.us_prob_yes : 1 - f.us_prob_yes) : null;
+    const qCell = q === null ? '–' : `<a href="https://quotient.social" title="Q forecast ${esc(f.q_forecast_id)}">${prob(q)}</a> <span class="small">${shortDate(f.q_created_at)}</span>`;
+    return `<tr><td class="name">${esc(f?.q_question || p.question)}</td><td>${esc(sideLabel(p.side, p.market, f))}</td><td class="num">${p.contracts}</td><td class="num">${px(p.avg_cost)}</td><td class="num">${px(p.mark)}</td><td class="num">${qCell}</td><td class="num">${usd(p.value)}</td><td class="num">${shortDate(p.resolves_at)}</td></tr>`;
+  }).join('') : '<tr class="empty"><td colspan="8">No open positions.</td></tr>';
+
+  // Trade ledger: broker fills, plus executor records that sent (or, in dry run, would have sent) an order.
+  const ledger = [];
+  const fillsById = new Map(trades.map((t) => [t.trade_id, t]));
+  for (const d of [...decisions].reverse()) {
+    if (!['dry_run', 'proposed', 'filled', 'partial'].includes(d.status)) continue;
+    const f = lastF.get(d.market_id);
+    const verb = d.action === 'exit' ? 'Sell' : 'Buy';
+    const tag = d.status === 'dry_run' ? 'Dry run' : d.action === 'exit' ? 'Sold' : 'Bought';
+    const name = esc(f?.q_question || d.question || d.market_id);
+    const what = `${verb} ${d.quantity} ${esc(sideLabel(d.side, d.market_id, d, f))} · ${name} @ ${px(d.limit_price)}`;
+    const qSide = d.q_prob === null || d.q_prob === undefined ? null : d.side === 'YES' ? d.q_prob : 1 - d.q_prob;
+    const facts = [`${usd(d.size_usd)}`, d.edge_after_fees !== null && d.edge_after_fees !== undefined ? `edge ${d.edge_after_fees} pts` : null, qSide !== null ? `Q ${prob(qSide)} (${shortDate(d.q_created_at)}, <a href="https://quotient.social">Quotient</a>)` : null, d.order_id ? 'order sent' : null].filter(Boolean).join(' · ');
+    ledger.push(entryHtml(day(d.timestamp), tag, d.status === 'dry_run' ? 'dry' : '', what, d.rationale, facts));
+  }
+  for (const t of trades) {
+    if (decisions.some((d) => d.order_id && t.order_id === d.order_id)) continue;
+    ledger.push(entryHtml(day(t.time), 'Fill', '', `${t.contracts} @ ${px(t.price)} · ${esc(t.market)}`, '', t.taker === null ? '' : t.taker ? 'took liquidity' : 'rested on the book'));
+  }
+  const le = document.getElementById('ledger');
+  if (ledger.length) paged(le, ledger); else le.innerHTML = '<p class="empty-note">No trades yet.</p>';
+
+  // Decisions: no-trade days and rejections.
+  const dec = [];
+  for (const d of [...decisions].reverse()) {
+    if (d.status === 'no_trade') dec.push(entryHtml(day(d.timestamp), d.dry_run ? 'No trade · dry run' : 'No trade', 'none', 'No trade today', d.rationale, ''));
+    else if (d.status === 'rejected') {
+      const f = lastF.get(d.market_id);
+      const rules = (d.rejected_rules || []).map((v) => `${esc(v.rule)}: ${esc(v.message)}`).join('<br>');
+      dec.push(entryHtml(day(d.timestamp), 'Rejected', 'rej', `${d.action === 'exit' ? 'Sell' : 'Buy'} ${d.quantity} ${esc(sideLabel(d.side, d.market_id, d, f))} · ${esc(f?.q_question || d.question || d.market_id)}`, d.rationale, rules));
+    }
+  }
+  const de = document.getElementById('decisions');
+  if (dec.length) paged(de, dec); else de.innerHTML = '<p class="empty-note">No no-trade days or rejections yet.</p>';
+
+  // Latest matches
+  const latestDay = forecasts.length ? day(forecasts[forecasts.length - 1].logged_at) : null;
+  const latest = forecasts.filter((f) => day(f.logged_at) === latestDay).sort((a, b) => (b.edge_after_fees_pp ?? -99) - (a.edge_after_fees_pp ?? -99));
+  if (latestDay) document.getElementById('matches-note').textContent += ` Session of ${latestDay}: ${latest.length} matches.`;
+  document.getElementById('matches').innerHTML = latest.length ? latest.map((f) => {
+    const e = f.edge_after_fees_pp;
+    return `<tr><td class="name">${esc(f.q_question || f.question)}</td><td class="num"><a href="https://quotient.social" title="Q forecast ${esc(f.q_forecast_id)}">${prob(f.us_prob_yes)}</a> <span class="small">${shortDate(f.q_created_at)}</span></td><td class="num">${px(f.bid)} / ${px(f.ask)}</td><td>${esc(sideLabel(f.best_side, f.market_id, f))}</td><td class="num ${e >= 10 ? 'pos' : e < 0 ? 'neg' : ''}">${e === null || e === undefined ? '–' : e.toFixed(1)}</td></tr>`;
+  }).join('') : '<tr class="empty"><td colspan="5">No matches logged yet.</td></tr>';
+
+  // Scorecard
+  if (score) {
+    const b = score.brier || {};
+    const fmt = (x) => (x && x.score !== null ? x.score.toFixed(3) : '–');
+    document.getElementById('s-resolved').textContent = `${(score.resolved || []).length} / ${score.logged_markets ?? 0}`;
+    document.getElementById('s-q').textContent = fmt(b.q);
+    document.getElementById('s-mkt').textContent = fmt(b.market);
+    document.getElementById('s-agent').textContent = fmt(b.agent_where_it_differs);
+    const closed = shadow.closed || [];
+    const wins = closed.filter((c) => c.pnl > 0).length;
+    document.getElementById('s-note').textContent = `Resolved of logged markets. Agent Brier covers ${b.agent_where_it_differs?.n ?? 0} markets where its estimate differed from Q (Q on the same markets: ${fmt(b.q_on_same_markets)}). Oracle shadow: ${wins} won, ${closed.length - wins} lost of ${closed.length} settled.`;
+  }
+})();
+</script>
+</body>
+</html>

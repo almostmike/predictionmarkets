@@ -22,7 +22,7 @@ Before starting: if the time is after 11:00 am PT on a scheduled run, exit witho
    - with trades: `{ "proposals": [ … ] }`. Each proposal has the fields in `scripts/lib/guardrails.ts` (`Proposal`), a rationale of at most 100 words, and an exit condition.
    - with none: `{ "proposals": [], "no_trade_reason": "…" }`.
 5. **Execute.** `node scripts/execute.ts .cache/proposals/<date>.json`. The executor applies the hard rules and logs every decision; don't argue with a rejection, and never call order endpoints any other way.
-6. **Shadow.** `node scripts/shadow.ts`.
+6. **Shadow and score.** `node scripts/shadow.ts`, then `node scripts/score.ts` (checks settlements and updates `data/scorecard.json` for the site's scorecard).
 7. **Publish.**
    - Write `journal/YYYY-MM-DD.md`: what Q showed, what matched and why, decisions and rejections, holdings, Quotient credits used, and the CLI and contract versions.
    - Publish only what rule 15 allows from Q.
