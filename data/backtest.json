@@ -1,0 +1,411 @@
+{
+ "run_date": "2026-10-23",
+ "method": "scripts/backtest/; see docs/BACKTEST.md",
+ "credits_used": 2780,
+ "markets_with_usable_forecasts": 192,
+ "by_group_markets": {
+  "eligible": 178,
+  "sports": 14
+ },
+ "brier": {
+  "eligible": {
+   "forecasts": 1071,
+   "q": 0.1969,
+   "market": 0.1709
+  },
+  "sports": {
+   "forecasts": 66,
+   "q": 0.3576,
+   "market": 0.326
+  }
+ },
+ "rules": {
+  "mandate only (Q edge >= 10)": {
+   "all": {
+    "n": 113,
+    "win_rate": 0.513,
+    "mean_return": -0.13,
+    "median_return": 0.171,
+    "ci90": [
+     -0.286,
+     0.028
+    ],
+    "avg_cost": 0.546
+   },
+   "eligible": {
+    "n": 109,
+    "win_rate": 0.523,
+    "mean_return": -0.157,
+    "median_return": 0.177,
+    "ci90": [
+     -0.299,
+     -0.022
+    ],
+    "avg_cost": 0.551
+   },
+   "sports": {
+    "n": 4,
+    "win_rate": 0.25,
+    "mean_return": 0.627,
+    "median_return": -1.0,
+    "ci90": [
+     -1.0,
+     2.255
+    ],
+    "avg_cost": 0.407
+   },
+   "eligible YES": {
+    "n": 28,
+    "win_rate": 0.214,
+    "mean_return": -0.461,
+    "median_return": -1.0,
+    "ci90": [
+     -0.785,
+     -0.102
+    ],
+    "avg_cost": 0.343
+   },
+   "eligible NO": {
+    "n": 81,
+    "win_rate": 0.63,
+    "mean_return": -0.053,
+    "median_return": 0.25,
+    "ci90": [
+     -0.191,
+     0.077
+    ],
+    "avg_cost": 0.623
+   },
+   "politics": {
+    "n": 77,
+    "win_rate": 0.442,
+    "mean_return": -0.234,
+    "median_return": -1.0,
+    "ci90": [
+     -0.412,
+     -0.058
+    ],
+    "avg_cost": 0.517
+   },
+   "geopolitics": {
+    "n": 30,
+    "win_rate": 0.767,
+    "mean_return": 0.097,
+    "median_return": 0.245,
+    "ci90": [
+     -0.114,
+     0.283
+    ],
+    "avg_cost": 0.655
+   }
+  },
+  "strategy v1.0 (k=0.5, agent edge >= 4)": {
+   "all": {
+    "n": 109,
+    "win_rate": 0.505,
+    "mean_return": -0.138,
+    "median_return": 0.152,
+    "ci90": [
+     -0.304,
+     0.037
+    ],
+    "avg_cost": 0.542
+   },
+   "eligible": {
+    "n": 105,
+    "win_rate": 0.514,
+    "mean_return": -0.167,
+    "median_return": 0.171,
+    "ci90": [
+     -0.31,
+     -0.022
+    ],
+    "avg_cost": 0.547
+   },
+   "sports": {
+    "n": 4,
+    "win_rate": 0.25,
+    "mean_return": 0.627,
+    "median_return": -1.0,
+    "ci90": [
+     -1.0,
+     2.255
+    ],
+    "avg_cost": 0.407
+   },
+   "eligible YES": {
+    "n": 28,
+    "win_rate": 0.214,
+    "mean_return": -0.461,
+    "median_return": -1.0,
+    "ci90": [
+     -0.785,
+     -0.086
+    ],
+    "avg_cost": 0.34
+   },
+   "eligible NO": {
+    "n": 77,
+    "win_rate": 0.623,
+    "mean_return": -0.061,
+    "median_return": 0.24,
+    "ci90": [
+     -0.209,
+     0.086
+    ],
+    "avg_cost": 0.623
+   },
+   "politics": {
+    "n": 74,
+    "win_rate": 0.446,
+    "mean_return": -0.221,
+    "median_return": -1.0,
+    "ci90": [
+     -0.407,
+     -0.036
+    ],
+    "avg_cost": 0.517
+   },
+   "geopolitics": {
+    "n": 29,
+    "win_rate": 0.724,
+    "mean_return": 0.028,
+    "median_return": 0.226,
+    "ci90": [
+     -0.19,
+     0.234
+    ],
+    "avg_cost": 0.641
+   }
+  },
+  "k=0.25, agent edge >= 4": {
+   "all": {
+    "n": 53,
+    "win_rate": 0.377,
+    "mean_return": -0.105,
+    "median_return": -1.0,
+    "ci90": [
+     -0.386,
+     0.179
+    ],
+    "avg_cost": 0.419
+   },
+   "eligible": {
+    "n": 53,
+    "win_rate": 0.377,
+    "mean_return": -0.105,
+    "median_return": -1.0,
+    "ci90": [
+     -0.386,
+     0.179
+    ],
+    "avg_cost": 0.419
+   },
+   "sports": {
+    "n": 0
+   },
+   "eligible YES": {
+    "n": 20,
+    "win_rate": 0.25,
+    "mean_return": -0.176,
+    "median_return": -1.0,
+    "ci90": [
+     -0.677,
+     0.395
+    ],
+    "avg_cost": 0.289
+   },
+   "eligible NO": {
+    "n": 33,
+    "win_rate": 0.455,
+    "mean_return": -0.061,
+    "median_return": -1.0,
+    "ci90": [
+     -0.394,
+     0.265
+    ],
+    "avg_cost": 0.498
+   },
+   "politics": {
+    "n": 39,
+    "win_rate": 0.359,
+    "mean_return": -0.095,
+    "median_return": -1.0,
+    "ci90": [
+     -0.424,
+     0.229
+    ],
+    "avg_cost": 0.407
+   },
+   "geopolitics": {
+    "n": 12,
+    "win_rate": 0.5,
+    "mean_return": 0.013,
+    "median_return": -0.291,
+    "ci90": [
+     -0.51,
+     0.589
+    ],
+    "avg_cost": 0.487
+   }
+  },
+  "k=0.75, agent edge >= 4": {
+   "all": {
+    "n": 113,
+    "win_rate": 0.513,
+    "mean_return": -0.13,
+    "median_return": 0.171,
+    "ci90": [
+     -0.286,
+     0.028
+    ],
+    "avg_cost": 0.546
+   },
+   "eligible": {
+    "n": 109,
+    "win_rate": 0.523,
+    "mean_return": -0.157,
+    "median_return": 0.177,
+    "ci90": [
+     -0.299,
+     -0.022
+    ],
+    "avg_cost": 0.551
+   },
+   "sports": {
+    "n": 4,
+    "win_rate": 0.25,
+    "mean_return": 0.627,
+    "median_return": -1.0,
+    "ci90": [
+     -1.0,
+     2.255
+    ],
+    "avg_cost": 0.407
+   },
+   "eligible YES": {
+    "n": 28,
+    "win_rate": 0.214,
+    "mean_return": -0.461,
+    "median_return": -1.0,
+    "ci90": [
+     -0.785,
+     -0.102
+    ],
+    "avg_cost": 0.343
+   },
+   "eligible NO": {
+    "n": 81,
+    "win_rate": 0.63,
+    "mean_return": -0.053,
+    "median_return": 0.25,
+    "ci90": [
+     -0.191,
+     0.077
+    ],
+    "avg_cost": 0.623
+   },
+   "politics": {
+    "n": 77,
+    "win_rate": 0.442,
+    "mean_return": -0.234,
+    "median_return": -1.0,
+    "ci90": [
+     -0.412,
+     -0.058
+    ],
+    "avg_cost": 0.517
+   },
+   "geopolitics": {
+    "n": 30,
+    "win_rate": 0.767,
+    "mean_return": 0.097,
+    "median_return": 0.245,
+    "ci90": [
+     -0.114,
+     0.283
+    ],
+    "avg_cost": 0.655
+   }
+  },
+  "k=1.0, agent edge >= 4": {
+   "all": {
+    "n": 113,
+    "win_rate": 0.513,
+    "mean_return": -0.13,
+    "median_return": 0.171,
+    "ci90": [
+     -0.286,
+     0.028
+    ],
+    "avg_cost": 0.546
+   },
+   "eligible": {
+    "n": 109,
+    "win_rate": 0.523,
+    "mean_return": -0.157,
+    "median_return": 0.177,
+    "ci90": [
+     -0.299,
+     -0.022
+    ],
+    "avg_cost": 0.551
+   },
+   "sports": {
+    "n": 4,
+    "win_rate": 0.25,
+    "mean_return": 0.627,
+    "median_return": -1.0,
+    "ci90": [
+     -1.0,
+     2.255
+    ],
+    "avg_cost": 0.407
+   },
+   "eligible YES": {
+    "n": 28,
+    "win_rate": 0.214,
+    "mean_return": -0.461,
+    "median_return": -1.0,
+    "ci90": [
+     -0.785,
+     -0.102
+    ],
+    "avg_cost": 0.343
+   },
+   "eligible NO": {
+    "n": 81,
+    "win_rate": 0.63,
+    "mean_return": -0.053,
+    "median_return": 0.25,
+    "ci90": [
+     -0.191,
+     0.077
+    ],
+    "avg_cost": 0.623
+   },
+   "politics": {
+    "n": 77,
+    "win_rate": 0.442,
+    "mean_return": -0.234,
+    "median_return": -1.0,
+    "ci90": [
+     -0.412,
+     -0.058
+    ],
+    "avg_cost": 0.517
+   },
+   "geopolitics": {
+    "n": 30,
+    "win_rate": 0.767,
+    "mean_return": 0.097,
+    "median_return": 0.245,
+    "ci90": [
+     -0.114,
+     0.283
+    ],
+    "avg_cost": 0.655
+   }
+  }
+ }
+}
