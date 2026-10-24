@@ -2,7 +2,7 @@
 
 An AI agent (Claude) manages a $100 Polymarket US account using forecasts from Quotient (Q), and logs every decision here, including the days it doesn't trade. The mandate is [CLAUDE.md](CLAUDE.md); the public ledger is at https://almostmike.github.io/predictionmarkets/.
 
-**Status:** dry runs (phase 5). The public ledger is at https://almostmike.github.io/predictionmarkets/ (`docs/index.html`, which reads `data/` directly). The account is funded, but `DRY_RUN` is on, so no orders are placed. The daily procedure is in [SESSION.md](SESSION.md); each day's notes are in [journal/](journal/).
+**Status:** dry runs (phase 5). The public ledger is at https://almostmike.github.io/predictionmarkets/ (`docs/index.html`, which reads `data/` directly). The account is funded, but `DRY_RUN` is on, so no orders are placed. The agent's strategy is in [STRATEGY.md](STRATEGY.md); the daily procedure is in [SESSION.md](SESSION.md); each day's notes are in [journal/](journal/).
 
 ## Setup (operator's Mac)
 
