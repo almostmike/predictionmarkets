@@ -18,11 +18,11 @@ Before starting: if the time is after 11:00 am PT on a scheduled run, exit witho
      ```
      node scripts/match.ts record <q-market-key> <us-slug> --orientation same|flipped --rules "<comparison>" [--contingency-only]
      ```
-4. **Decide.** Apply STRATEGY.md to the recorded matches and holdings. Write `.cache/proposals/<date>.json`:
+4. **Decide.** Apply STRATEGY.md to the recorded matches and holdings. While STRATEGY.md says a category is closed (v1.1: all of them), log no trade for it, and list in the journal the matches that would have qualified under sections 1–6. Write `.cache/proposals/<date>.json`:
    - with trades: `{ "proposals": [ … ] }`. Each proposal has the fields in `scripts/lib/guardrails.ts` (`Proposal`), a rationale of at most 100 words, and an exit condition.
    - with none: `{ "proposals": [], "no_trade_reason": "…" }`.
 5. **Execute.** `node scripts/execute.ts .cache/proposals/<date>.json`. The executor applies the hard rules and logs every decision; don't argue with a rejection, and never call order endpoints any other way.
-6. **Shadow and score.** `node scripts/shadow.ts`, then `node scripts/score.ts` (checks settlements and updates `data/scorecard.json` for the site's scorecard).
+6. **Shadow and score.** `node scripts/shadow.ts`, then `node scripts/score.ts`. It checks settlements and updates `data/scorecard.json`, including each category group's progress toward reopening (STRATEGY.md section 8). Report that progress in the Sunday journal.
 7. **Publish.**
    - Write `journal/YYYY-MM-DD.md`: what Q showed, what matched and why, decisions and rejections, holdings, Quotient credits used, and the CLI and contract versions.
    - Publish only what rule 15 allows from Q.

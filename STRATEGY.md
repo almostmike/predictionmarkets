@@ -1,6 +1,18 @@
-# STRATEGY.md — v1.0
+# STRATEGY.md — v1.1
 
-2026-10-23. Written by the agent (Claude) under CLAUDE.md v0.4. The operator reviewed it for mandate compliance on 2026-10-23; it is binding from this commit. Changes need a dated amendment, explained in that day's journal and published before they govern a trade. This file never loosens a mandate rule; where both apply, the stricter one wins.
+v1.1, 2026-10-24. Written by the agent (Claude) under CLAUDE.md v0.4. The operator reviewed it for mandate compliance on 2026-10-24; it is binding from this commit. Changes need a dated amendment, explained in that day's journal and published before they govern a trade. This file never loosens a mandate rule; where both apply, the stricter one wins.
+
+## Current status: abstaining (v1.1)
+
+**The agent places no entries in any category.** The phase 3a backtest (`docs/BACKTEST.md`) found that following Q's 10-point disagreements in the categories v1.0 treated as eligible lost about 16% per trade after fees: 90% interval −30% to −2%, about 105 trades. On those markets Q's Brier score was worse than the market's (0.197 vs 0.171). Section 7 of v1.0 committed the agent to a stricter version in that case. Abstaining is the strictest, and it's the honest reading of the evidence: until Q shows an edge on the markets we can actually trade, the agent has no reason to expect one.
+
+The experiment keeps running:
+- **Every session still runs in full:** reconcile, holdings review, scan, match recording, and publishing.
+- **The decision is logged as no trade,** with the matches that would have qualified under v1.0's rules named in the journal.
+- **The oracle shadow keeps following Q mechanically** under the mandate's rules, so the record shows what blind oracle-following would have earned.
+- **The scorecard accumulates Q's forward record,** category by category, on Polymarket US contracts.
+
+A category reopens only under section 8. Once it reopens, sections 1–6 govern trades in it. Until then they describe how the agent would trade, and the journal's would-have-traded list applies them.
 
 ## The view behind it
 
@@ -77,11 +89,34 @@ A `forecast_status` of `caution` or `warning` (the market moving against Q) is n
 - Buy paid forecast requests, act on a single contest whose probabilities don't add up, or trade a contract whose rules it couldn't read on both venues.
 - Change this strategy mid-session. Amendments take effect the day after they are published.
 
-## 7. Review
+## 7. Review (v1.0; see section 8 for reopening categories)
 
 - **Weekly**, in the Sunday journal: the scorecard (Brier for Q, the market, and the agent), the agent against the shadow, and whether `k`, the 4-point bar, or the sports gate should change. Any change goes through an amendment.
 - **Before go-live:** the phase 3a backtest has not been run yet. If it shows that Q's 10-point disagreements in eligible categories lost money against the market price, the agent will propose a stricter v1.1 before trading.
 
+## 8. Reopening a category (v1.1)
+
+Categories are grouped as Polymarket US labels them:
+- politics and elections;
+- economics (macro: Fed, CPI, jobs, GDP);
+- finance, commodities, and equities;
+- technology, culture, and everything else;
+- sports.
+
+A group reopens for entries only when every one of these holds, measured by `scripts/score.ts` on our own forward record:
+
+1. **Enough history:** at least **40 resolved forecasts** in the group in `data/forecasts.jsonl`. Each market's first logged forecast counts once, and outcomes come from Polymarket US settlement.
+2. **Q beat the market:** Q's Brier score is lower than the Polymarket US midpoint's at log time, and the lower bound of a 90% paired bootstrap interval for (market Brier − Q Brier) is above zero. In plain terms, Q was more accurate than the price we could trade against, and not by luck.
+3. **Following Q made money:** the oracle shadow's settled positions in the group number at least **15**, and their total profit after fees is positive.
+4. **For sports only:** Quotient no longer grades the sports cohort as `insufficient`. This is v1.0's gate, kept.
+
+When a group meets all of them, the agent proposes a dated amendment that reopens it. The amendment also sets `k` for that group from the forward record, and a group never reopens with `k` above 0.75. The operator reviews it for mandate compliance before it governs a trade, as for any change to this file.
+
+A reopened group closes again, by the same kind of amendment, if over its next 40 resolved forecasts Q's Brier score is no better than the market's.
+
+**Weekly check:** the Sunday journal reports each group's progress against the criteria (resolved count, Brier for Q and the market, the bootstrap bound, and the shadow's settled profit).
+
 ## Amendments
 
+- **v1.1, 2026-10-24 (reviewed by the operator for mandate compliance on 2026-10-24):** the agent abstains from entries in every category, because the phase 3a backtest showed Q's 10-point disagreements losing money after fees in the categories v1.0 treated as eligible. Added section 8, which sets the criteria for reopening a category: 40 resolved forward forecasts, Q beating the market's Brier score with a positive 90% bootstrap bound, and a profitable oracle shadow in the group; for sports, also Quotient's quality gate. The oracle shadow, scan, and scorecard continue unchanged.
 - **v1.0, 2026-10-23:** first version. Reviewed by the operator for mandate compliance on 2026-10-23.
