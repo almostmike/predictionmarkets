@@ -3,6 +3,12 @@
 useDefault = true
 
 [[rules]]
+id = "anthropic-token"
+description = "Anthropic API key or Claude Code OAuth token"
+regex = '''sk-ant-[A-Za-z0-9_-]{20,}'''
+keywords = ["sk-ant-"]
+
+[[rules]]
 id = "quotient-key"
 description = "Quotient API key assigned a value"
 regex = '''QUOTIENT_API_KEY[ \t]*[=:][ \t]*["']?[A-Za-z0-9+/=_-]{8,}'''
