@@ -28,7 +28,7 @@ LOG=logs/session-$DATE.log
 note "starting the daily session for $DATE"
 {
   git pull --ff-only -q || { print "git pull failed; not running"; exit 1; }
-  claude -p "$(<ops/daily-prompt.md)" --max-turns 250
+  claude -p "$(<ops/daily-prompt.md)" --max-turns 250 < /dev/null
   print "claude exit $?"
 } >> "$LOG" 2>&1
 note "finished $DATE (log: $LOG)"
