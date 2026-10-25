@@ -15,6 +15,14 @@
       "positions_value": 0,
       "open_positions": 0,
       "dry_run": true
+    },
+    {
+      "date": "2026-10-25",
+      "nav": 100,
+      "cash": 100,
+      "positions_value": 0,
+      "open_positions": 0,
+      "dry_run": true
     }
   ]
 }
