@@ -1,6 +1,6 @@
 {
-  "as_of": "2026-10-25T16:11:28.662Z",
-  "logged_markets": 45,
+  "as_of": "2026-10-26T16:08:59.694Z",
+  "logged_markets": 56,
   "resolved": [
     {
       "market": "aec-nba-was-chi-2026-10-24",
@@ -11,6 +11,16 @@
       "q_prob": 0.3684,
       "market_prob": 0.535,
       "agent_prob": 0.452
+    },
+    {
+      "market": "aec-nfl-pit-no-2026-10-25",
+      "group": "sports",
+      "question": "Who will win in the upcoming football event Pittsburgh Steelers vs New Orleans Saints scheduled for October 25, 2026 at 1:30 PM UTC?",
+      "settled_at": null,
+      "outcome": 1,
+      "q_prob": 0.7722,
+      "market_prob": 0.6238,
+      "agent_prob": 0.698
     },
     {
       "market": "aec-cfb-okl-mspst-2026-10-24",
@@ -43,6 +53,16 @@
       "agent_prob": null
     },
     {
+      "market": "aec-nfl-den-ari-2026-10-25",
+      "group": "sports",
+      "question": "Who will win in the upcoming football event Denver Broncos vs Arizona Cardinals scheduled for October 25, 2026 at 8:05 PM UTC?",
+      "settled_at": null,
+      "outcome": 1,
+      "q_prob": 0.7625,
+      "market_prob": 0.6688,
+      "agent_prob": null
+    },
+    {
       "market": "aec-nba-hou-atl-2026-10-24",
       "group": "sports",
       "question": "Who will win in the upcoming basketball event HOU Rockets vs ATL Hawks scheduled for October 25, 2026 at 12:00 AM UTC?",
@@ -50,6 +70,16 @@
       "outcome": 1,
       "q_prob": 0.4631,
       "market_prob": 0.565,
+      "agent_prob": null
+    },
+    {
+      "market": "aec-nba-lac-okc-2026-10-25",
+      "group": "sports",
+      "question": "Who will win in the upcoming basketball event LA Clippers vs OKC Thunder scheduled for October 25, 2026 at 11:00 PM UTC?",
+      "settled_at": null,
+      "outcome": 0,
+      "q_prob": 0.0908,
+      "market_prob": 0.16,
       "agent_prob": null
     },
     {
@@ -111,24 +141,54 @@
       "q_prob": 0.7117,
       "market_prob": 0.7625,
       "agent_prob": null
+    },
+    {
+      "market": "aec-nba-lal-uta-2026-10-25",
+      "group": "sports",
+      "question": "Who will win in the upcoming basketball event LA Lakers vs UTA Jazz scheduled for October 25, 2026 at 9:00 PM UTC?",
+      "settled_at": null,
+      "outcome": 1,
+      "q_prob": 0.6475,
+      "market_prob": 0.59,
+      "agent_prob": null
+    },
+    {
+      "market": "aec-nba-mem-sac-2026-10-25",
+      "group": "sports",
+      "question": "Who will win in the upcoming basketball event MEM Grizzlies vs SAC Kings scheduled for October 26, 2026 at 1:00 AM UTC?",
+      "settled_at": null,
+      "outcome": 1,
+      "q_prob": 0.543,
+      "market_prob": 0.605,
+      "agent_prob": null
+    },
+    {
+      "market": "aec-nhl-nyi-dal-2026-10-25",
+      "group": "sports",
+      "question": "Who will win in the upcoming hockey event NYI Islanders vs DAL Stars scheduled for October 25, 2026 at 10:00 PM UTC?",
+      "settled_at": null,
+      "outcome": 0,
+      "q_prob": 0.4336,
+      "market_prob": 0.375,
+      "agent_prob": null
     }
   ],
   "brier": {
     "q": {
-      "n": 11,
-      "score": 0.255
+      "n": 17,
+      "score": 0.2025
     },
     "market": {
-      "n": 11,
-      "score": 0.2256
+      "n": 17,
+      "score": 0.1896
     },
     "agent_where_it_differs": {
-      "n": 3,
-      "score": 0.1596
+      "n": 4,
+      "score": 0.1425
     },
     "q_on_same_markets": {
-      "n": 3,
-      "score": 0.193
+      "n": 4,
+      "score": 0.1577
     }
   },
   "reopening": {
@@ -185,12 +245,12 @@
       }
     },
     "sports": {
-      "resolved": 11,
-      "q_brier": 0.255,
-      "market_brier": 0.2256,
-      "bootstrap_lower_market_minus_q": -0.0735,
-      "shadow_settled": 3,
-      "shadow_pnl": -6.96,
+      "resolved": 17,
+      "q_brier": 0.2025,
+      "market_brier": 0.1896,
+      "bootstrap_lower_market_minus_q": -0.0484,
+      "shadow_settled": 5,
+      "shadow_pnl": -1.9,
       "criteria_met": {
         "resolved_40": false,
         "q_beats_market": false,
